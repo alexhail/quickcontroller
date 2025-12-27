@@ -1,0 +1,91 @@
+name: quickcontroller
+
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: qc-postgres
+    environment:
+      POSTGRES_USER: ${QC_DB_USER:-quickcontroller}
+      POSTGRES_PASSWORD: ${QC_DB_PASSWORD:-devpassword}
+      POSTGRES_DB: ${QC_DB_NAME:-quickcontroller}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${QC_DB_USER:-quickcontroller}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: qc-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: qc-api
+    environment:
+      QC_DB_HOST: postgres
+      QC_DB_PORT: 5432
+      QC_DB_USER: ${QC_DB_USER:-quickcontroller}
+      QC_DB_PASSWORD: ${QC_DB_PASSWORD:-devpassword}
+      QC_DB_NAME: ${QC_DB_NAME:-quickcontroller}
+      QC_REDIS_HOST: redis
+      QC_REDIS_PORT: 6379
+      QC_JWT_SECRET: ${QC_JWT_SECRET:-change-this-to-a-secure-random-string}
+      QC_DEBUG: "true"
+      QC_CORS_ORIGINS: '["http://localhost:5173"]'
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: qc-frontend
+    environment:
+      VITE_API_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api
+
+  e2e:
+    build:
+      context: ./tests/e2e
+      dockerfile: Dockerfile
+    container_name: qc-e2e
+    environment:
+      BASE_URL: http://localhost:5173
+    network_mode: host
+    volumes:
+      - ./tests/e2e:/tests
+      - /tests/node_modules
+    profiles:
+      - test
+
+volumes:
+  postgres_data:
+  redis_data:

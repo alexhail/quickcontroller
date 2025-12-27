@@ -1,0 +1,65 @@
+@use 'variables' as *;
+
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-sm $spacing-md;
+  font-weight: 500;
+  border-radius: $radius-md;
+  border: none;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@mixin button-primary {
+  @include button-base;
+  background: $color-primary;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-dark;
+  }
+}
+
+@mixin button-secondary {
+  @include button-base;
+  background: $color-bg-tertiary;
+  color: $color-text;
+
+  &:hover:not(:disabled) {
+    background: lighten($color-bg-tertiary, 5%);
+  }
+}
+
+@mixin input-base {
+  width: 100%;
+  padding: $spacing-sm $spacing-md;
+  background: $color-bg-secondary;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  color: $color-text;
+  font-size: 1rem;
+  transition: border-color $transition-fast;
+
+  &::placeholder {
+    color: $color-text-muted;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+  }
+}
+
+@mixin card {
+  background: $color-bg-secondary;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+}
