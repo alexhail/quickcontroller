@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'variables' as *;
 
 @mixin button-base {
@@ -33,7 +34,7 @@
   color: $color-text;
 
   &:hover:not(:disabled) {
-    background: lighten($color-bg-tertiary, 5%);
+    background: color.adjust($color-bg-tertiary, $lightness: 5%);
   }
 }
 
@@ -55,6 +56,10 @@
     outline: none;
     border-color: $color-primary;
   }
+}
+
+@mixin input {
+  @include input-base;
 }
 
 @mixin card {

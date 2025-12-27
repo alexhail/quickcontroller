@@ -45,8 +45,13 @@ services:
       QC_REDIS_HOST: redis
       QC_REDIS_PORT: 6379
       QC_JWT_SECRET: ${QC_JWT_SECRET:-change-this-to-a-secure-random-string}
+      QC_TOKEN_ENCRYPTION_KEY: ${QC_TOKEN_ENCRYPTION_KEY:-YINsH1YFhSvUr6Wlf6Z8zRmg7WYMca-_5jgDimQyzI8=}
       QC_DEBUG: "true"
       QC_CORS_ORIGINS: '["http://localhost:5173"]'
+    extra_hosts:
+      # Map .local hostnames to IPs for mDNS compatibility in Docker
+      - "homeassistant.local:10.0.0.151"
+      - "homeassistant:10.0.0.151"
     ports:
       - "8000:8000"
     volumes:

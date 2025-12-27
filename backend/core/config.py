@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
+    token_encryption_key: str = "change-this-to-a-fernet-key"  # Generate with Fernet.generate_key()
 
     # API
     api_host: str = "0.0.0.0"
