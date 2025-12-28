@@ -1,5 +1,14 @@
 @use 'variables' as *;
 
+// Mona Sans font face
+@font-face {
+  font-family: 'Mona Sans';
+  src: url('/src/assets/fonts/Mona-Sans.woff2') format('woff2');
+  font-weight: 100 900;
+  font-stretch: 75% 125%;
+  font-display: swap;
+}
+
 *,
 *::before,
 *::after {
@@ -15,7 +24,7 @@ html {
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Mona Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: $color-bg;
   color: $color-text;
   line-height: 1.5;

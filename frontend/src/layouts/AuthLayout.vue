@@ -19,6 +19,7 @@ const { loading } = useAuth()
   display: flex;
   align-items: center;
   justify-content: center;
+  background: $color-bg;
 }
 
 .spinner {

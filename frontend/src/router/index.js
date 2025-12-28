@@ -4,8 +4,6 @@ import { useAuth } from '../core/composables/useAuth.js'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import DashboardView from '../views/DashboardView.vue'
-import ControllersView from '../views/ControllersView.vue'
-import DevicesView from '../views/DevicesView.vue'
 
 const routes = [
   {
@@ -24,24 +22,6 @@ const routes = [
     path: '/',
     name: 'dashboard',
     component: DashboardView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/controllers',
-    name: 'controllers',
-    component: ControllersView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/devices',
-    name: 'devices',
-    component: DevicesView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/devices/:controllerId',
-    name: 'devices-controller',
-    component: DevicesView,
     meta: { requiresAuth: true },
   },
 ]

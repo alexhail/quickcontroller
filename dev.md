@@ -8,7 +8,7 @@
 
 ## 1. Project Overview
 
-Quick Controller is an IoT meta-analysis platform that provides a cloud-based intelligence and unification layer on top of HomeAssistant-powered device ecosystems. Rather than replacing HomeAssistant, Quick Controller treats HomeAssistant instances as managed data sources, enabling centralized multi-tenant device management, historical data analysis, real-time monitoring, and modular domain-specific applications.
+Quick Controller is an IoT visualization and operations platform that provides a cloud-based intelligence and unification layer on top of HomeAssistant-powered device ecosystems. Rather than replacing HomeAssistant, Quick Controller treats HomeAssistant instances as managed data sources, enabling centralized multi-tenant device management, historical data analysis, real-time monitoring, and modular domain-specific applications.
 
 ### 1.1 Core Value Proposition
 

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Quick Controller is an IoT meta-analysis platform that provides a cloud-based intelligence layer on top of HomeAssistant-powered device ecosystems. This project uses a modern full-stack architecture with FastAPI backend and Vue 3 frontend.
+Quick Controller is an IoT visualization and operations platform that provides a cloud-based intelligence layer on top of HomeAssistant-powered device ecosystems. This project uses a modern full-stack architecture with FastAPI backend and Vue 3 frontend.
 
 ## Tech Stack
 
