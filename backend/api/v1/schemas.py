@@ -73,6 +73,19 @@ class TestConnectionResponse(BaseModel):
     version: Optional[str] = None
 
 
+# App schemas
+class AppMetadata(BaseModel):
+    app_id: str
+    display_name: str
+    icon: str
+    default_access: bool
+
+
+class AppPermission(BaseModel):
+    app_id: str
+    has_access: bool
+
+
 # Entity/Device schemas
 class EntityState(BaseModel):
     entity_id: str

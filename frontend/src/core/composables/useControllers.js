@@ -10,7 +10,7 @@ export function useControllers() {
     loading.value = true
     error.value = null
     try {
-      controllers.value = await apiJson('/api/v1/controllers')
+      controllers.value = await apiJson('/api/v1/apps/command_center/controllers')
     } catch (err) {
       error.value = err.message
       controllers.value = []
@@ -21,7 +21,7 @@ export function useControllers() {
 
   async function addController(name, url, accessToken, discoveredVia = null) {
     error.value = null
-    const data = await apiJson('/api/v1/controllers', {
+    const data = await apiJson('/api/v1/apps/command_center/controllers', {
       method: 'POST',
       body: JSON.stringify({
         name,
@@ -36,7 +36,7 @@ export function useControllers() {
 
   async function updateController(id, updates) {
     error.value = null
-    const data = await apiJson(`/api/v1/controllers/${id}`, {
+    const data = await apiJson(`/api/v1/apps/command_center/controllers/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(updates),
     })
@@ -50,7 +50,7 @@ export function useControllers() {
 
   async function deleteController(id) {
     error.value = null
-    await apiJson(`/api/v1/controllers/${id}`, {
+    await apiJson(`/api/v1/apps/command_center/controllers/${id}`, {
       method: 'DELETE',
     })
     controllers.value = controllers.value.filter((c) => c.id !== id)
@@ -58,14 +58,14 @@ export function useControllers() {
 
   async function discoverControllers() {
     error.value = null
-    return await apiJson('/api/v1/controllers/discover', {
+    return await apiJson('/api/v1/apps/command_center/controllers/discover', {
       method: 'POST',
     })
   }
 
   async function testConnection(url, accessToken) {
     error.value = null
-    return await apiJson('/api/v1/controllers/test-connection', {
+    return await apiJson('/api/v1/apps/command_center/controllers/test-connection', {
       method: 'POST',
       body: JSON.stringify({
         url,

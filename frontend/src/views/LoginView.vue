@@ -17,7 +17,7 @@ async function handleSubmit() {
 
   try {
     await login(email.value, password.value)
-    router.push({ name: 'dashboard' })
+    router.push('/')
   } catch (e) {
     error.value = e.message
   } finally {

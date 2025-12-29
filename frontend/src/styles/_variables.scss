@@ -1,24 +1,25 @@
-// Colors - Dark theme based on #161b25
-$color-bg: #161b25;
-$color-bg-secondary: #2a3140;
-$color-bg-tertiary: #353d4f;
-$color-bg-elevated: #3a435a;
+// Colors - Dark theme (~50% desaturated blues for non-interactive elements)
+$color-bg: #18191e;
+$color-bg-secondary: #2c2f36;
+$color-bg-tertiary: #383b42;
+$color-bg-elevated: #3e424a;
 
+// Interactive/highlight colors - keep full saturation
 $color-primary: #5b9cff;
 $color-primary-dark: #3d82e8;
 $color-primary-light: #7db3ff;
 
-$color-secondary: #7e8ba3;
+$color-secondary: #878a91;
 $color-success: #4caf50;
 $color-warning: #ffa726;
 $color-error: #f44336;
 
-$color-text: #e8eaf0;
-$color-text-secondary: #a0a8be;
-$color-text-muted: #6e7688;
+$color-text: #e9e9eb;
+$color-text-secondary: #a7aab0;
+$color-text-muted: #75777c;
 
-$color-border: #3a4254;
-$color-border-light: #4a5264;
+$color-border: #3e424a;
+$color-border-light: #4f5258;
 
 // Spacing
 $spacing-xs: 0.25rem;

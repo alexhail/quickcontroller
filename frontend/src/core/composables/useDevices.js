@@ -17,8 +17,8 @@ export function useDevices() {
 
     try {
       const url = domain
-        ? `/api/v1/controllers/${controllerId}/entities?domain=${domain}`
-        : `/api/v1/controllers/${controllerId}/entities`
+        ? `/api/v1/apps/command_center/controllers/${controllerId}/entities?domain=${domain}`
+        : `/api/v1/apps/command_center/controllers/${controllerId}/entities`
       entities.value = await apiJson(url)
     } catch (err) {
       error.value = err.message

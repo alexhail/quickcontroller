@@ -1,14 +1,11 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuth } from '../core/composables/useAuth.js'
-import { useControllers } from '../core/composables/useControllers.js'
-import { useDevices } from '../core/composables/useDevices.js'
-import AddControllerModal from '../components/AddControllerModal.vue'
-import EntityCard from '../components/EntityCard.vue'
+import { useControllers } from '../../../core/composables/useControllers.js'
+import { useDevices } from '../../../core/composables/useDevices.js'
+import AddControllerModal from '../../../components/AddControllerModal.vue'
+import EntityCard from '../../../components/EntityCard.vue'
+import AppNavigation from '../components/AppNavigation.vue'
 
-const router = useRouter()
-const { user, logout } = useAuth()
 const { controllers, loading: controllersLoading, fetchControllers, deleteController } = useControllers()
 const {
   entities,
@@ -33,11 +30,6 @@ onMounted(async () => {
     fetchEntities(onlineController.id)
   }
 })
-
-async function handleLogout() {
-  await logout()
-  router.push({ name: 'login' })
-}
 
 function openAddModal() {
   showAddModal.value = true
@@ -113,60 +105,82 @@ function getEntityCountByDomain(domain) {
 </script>
 
 <template>
-  <div class="command-center">
-    <header class="header">
-      <div class="header-left">
-        <img src="/src/assets/logo.png" alt="Quick Controller" class="logo" />
-        <div class="brand">
-          <h1 class="brand-title">Quick Controller</h1>
-          <p class="brand-subtitle">Command Center</p>
+  <div class="controllers-view">
+    <AppNavigation />
+    <header class="page-header">
+      <div class="header-content">
+        <div class="header-title">
+          <span class="material-symbols-outlined">hub</span>
+          <div>
+            <h1>Controllers</h1>
+            <p class="subtitle">Manage your Home Assistant instances</p>
+          </div>
         </div>
-      </div>
-      <div class="user-menu">
-        <span class="material-symbols-outlined">account_circle</span>
-        <span class="email">{{ user?.email }}</span>
-        <button class="logout-btn" @click="handleLogout">
-          <span class="material-symbols-outlined">logout</span>
-          Logout
+        <button class="add-btn" @click="openAddModal">
+          <span class="material-symbols-outlined">add</span>
+          Add Controller
         </button>
       </div>
     </header>
 
-    <main class="main">
-      <div class="control-grid">
-        <!-- Controllers Panel -->
-        <section class="panel controllers-panel">
-          <div class="panel-header">
-            <div class="panel-title">
-              <span class="material-symbols-outlined">hub</span>
-              <h2>Master Controllers</h2>
-              <span class="count">{{ controllers.length }}</span>
+    <div class="control-grid">
+      <!-- Controllers Panel -->
+      <section class="panel controllers-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <h2>Master Controllers</h2>
+            <span class="count">{{ controllers.length }}</span>
+          </div>
+        </div>
+
+        <div v-if="controllersLoading" class="panel-loading">
+          <div class="spinner"></div>
+        </div>
+
+        <div v-else-if="controllers.length === 0" class="panel-empty">
+          <span class="material-symbols-outlined">cloud_off</span>
+          <p>No controllers configured</p>
+          <button class="add-btn-large" @click="openAddModal">
+            <span class="material-symbols-outlined">add</span>
+            Add Controller
+          </button>
+        </div>
+
+        <div v-else class="controllers-list">
+          <div
+            v-for="controller in onlineControllers"
+            :key="controller.id"
+            :class="['controller-item', { active: selectedControllerId === controller.id }]"
+            @click="selectController(controller.id)"
+          >
+            <div class="controller-info">
+              <div class="controller-header">
+                <h3>{{ controller.name }}</h3>
+                <span :class="['status-dot', getStatusClass(controller.connection_status)]"></span>
+              </div>
+              <p class="controller-url">{{ controller.url }}</p>
+              <div class="controller-meta">
+                <span v-if="controller.ha_version" class="meta-item">
+                  <span class="material-symbols-outlined">info</span>
+                  {{ controller.ha_version }}
+                </span>
+              </div>
             </div>
-            <button class="add-btn" @click="openAddModal">
-              <span class="material-symbols-outlined">add</span>
-              Add
+            <button
+              class="delete-btn"
+              :disabled="deletingId === controller.id"
+              @click.stop="handleDelete(controller)"
+            >
+              <span class="material-symbols-outlined">delete</span>
             </button>
           </div>
 
-          <div v-if="controllersLoading" class="panel-loading">
-            <div class="spinner"></div>
-          </div>
-
-          <div v-else-if="controllers.length === 0" class="panel-empty">
-            <span class="material-symbols-outlined">cloud_off</span>
-            <p>No controllers configured</p>
-            <button class="add-btn-large" @click="openAddModal">
-              <span class="material-symbols-outlined">add</span>
-              Add Controller
-            </button>
-          </div>
-
-          <div v-else class="controllers-list">
+          <div v-if="offlineControllers.length > 0" class="offline-section">
+            <h4 class="section-title">Offline</h4>
             <div
-              v-for="controller in onlineControllers"
+              v-for="controller in offlineControllers"
               :key="controller.id"
-              :class="['controller-item', { active: selectedControllerId === controller.id }]"
-              @click="selectController(controller.id)"
+              class="controller-item offline"
             >
               <div class="controller-info">
                 <div class="controller-header">
@@ -174,12 +188,6 @@ function getEntityCountByDomain(domain) {
                   <span :class="['status-dot', getStatusClass(controller.connection_status)]"></span>
                 </div>
                 <p class="controller-url">{{ controller.url }}</p>
-                <div class="controller-meta">
-                  <span v-if="controller.ha_version" class="meta-item">
-                    <span class="material-symbols-outlined">info</span>
-                    {{ controller.ha_version }}
-                  </span>
-                </div>
               </div>
               <button
                 class="delete-btn"
@@ -189,84 +197,59 @@ function getEntityCountByDomain(domain) {
                 <span class="material-symbols-outlined">delete</span>
               </button>
             </div>
-
-            <div v-if="offlineControllers.length > 0" class="offline-section">
-              <h4 class="section-title">Offline</h4>
-              <div
-                v-for="controller in offlineControllers"
-                :key="controller.id"
-                class="controller-item offline"
-              >
-                <div class="controller-info">
-                  <div class="controller-header">
-                    <h3>{{ controller.name }}</h3>
-                    <span :class="['status-dot', getStatusClass(controller.connection_status)]"></span>
-                  </div>
-                  <p class="controller-url">{{ controller.url }}</p>
-                </div>
-                <button
-                  class="delete-btn"
-                  :disabled="deletingId === controller.id"
-                  @click.stop="handleDelete(controller)"
-                >
-                  <span class="material-symbols-outlined">delete</span>
-                </button>
-              </div>
-            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <!-- Entities Panel -->
-        <section class="panel entities-panel">
-          <div class="panel-header">
-            <div class="panel-title">
-              <span class="material-symbols-outlined">devices</span>
-              <h2>Active Entities</h2>
-              <span class="count">{{ activeEntities.length }}</span>
-            </div>
-            <div v-if="selectedController" class="controller-badge">
-              {{ selectedController.name }}
-            </div>
+      <!-- Entities Panel -->
+      <section class="panel entities-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <h2>Active Entities</h2>
+            <span class="count">{{ activeEntities.length }}</span>
           </div>
+          <div v-if="selectedController" class="controller-badge">
+            {{ selectedController.name }}
+          </div>
+        </div>
 
-          <!-- Domain Filters -->
-          <div v-if="activeDomains.length > 0 && !devicesLoading" class="domain-filters">
-            <button
-              :class="['domain-chip', { active: !selectedDomain }]"
-              @click="selectedDomain = null"
-            >
-              All ({{ activeEntities.length }})
-            </button>
-            <button
-              v-for="domain in activeDomains"
-              :key="domain"
-              :class="['domain-chip', { active: selectedDomain === domain }]"
-              @click="selectedDomain = domain"
-            >
-              {{ domain }} ({{ getEntityCountByDomain(domain) }})
-            </button>
-          </div>
+        <!-- Domain Filters -->
+        <div v-if="activeDomains.length > 0 && !devicesLoading" class="domain-filters">
+          <button
+            :class="['domain-chip', { active: !selectedDomain }]"
+            @click="selectedDomain = null"
+          >
+            All ({{ activeEntities.length }})
+          </button>
+          <button
+            v-for="domain in activeDomains"
+            :key="domain"
+            :class="['domain-chip', { active: selectedDomain === domain }]"
+            @click="selectedDomain = domain"
+          >
+            {{ domain }} ({{ getEntityCountByDomain(domain) }})
+          </button>
+        </div>
 
-          <div v-if="!selectedControllerId" class="panel-empty">
-            <span class="material-symbols-outlined">select_all</span>
-            <p>Select a controller to view entities</p>
-          </div>
+        <div v-if="!selectedControllerId" class="panel-empty">
+          <span class="material-symbols-outlined">select_all</span>
+          <p>Select a controller to view entities</p>
+        </div>
 
-          <div v-else-if="devicesLoading" class="panel-loading">
-            <div class="spinner"></div>
-          </div>
+        <div v-else-if="devicesLoading" class="panel-loading">
+          <div class="spinner"></div>
+        </div>
 
-          <div v-else-if="filteredEntities.length === 0" class="panel-empty">
-            <span class="material-symbols-outlined">device_unknown</span>
-            <p>No active entities found</p>
-          </div>
+        <div v-else-if="filteredEntities.length === 0" class="panel-empty">
+          <span class="material-symbols-outlined">device_unknown</span>
+          <p>No active entities found</p>
+        </div>
 
-          <div v-else class="entities-grid">
-            <EntityCard v-for="entity in filteredEntities" :key="entity.entity_id" :entity="entity" />
-          </div>
-        </section>
-      </div>
-    </main>
+        <div v-else class="entities-grid">
+          <EntityCard v-for="entity in filteredEntities" :key="entity.entity_id" :entity="entity" />
+        </div>
+      </section>
+    </div>
 
     <AddControllerModal
       v-if="showAddModal"
@@ -277,107 +260,86 @@ function getEntityCountByDomain(domain) {
 </template>
 
 <style lang="scss" scoped>
-@use '../styles/variables' as *;
+@use '../../../styles/variables' as *;
 
-.command-center {
-  min-height: 100vh;
+.controllers-view {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  background: $color-bg;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: $spacing-md $spacing-xl;
+.page-header {
+  padding: $spacing-lg;
   background: $color-bg-secondary;
   border-bottom: 1px solid $color-border;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-  .header-left {
+  .header-content {
     display: flex;
     align-items: center;
-    gap: $spacing-md;
-
-    .logo {
-      width: 40px;
-      height: 40px;
-    }
-
-    .brand {
-      .brand-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin: 0;
-        color: $color-text;
-      }
-
-      .brand-subtitle {
-        font-size: 0.75rem;
-        color: $color-text-secondary;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-    }
+    justify-content: space-between;
+    max-width: 1800px;
+    margin: 0 auto;
   }
 
-  .user-menu {
+  .header-title {
     display: flex;
     align-items: center;
     gap: $spacing-md;
 
     .material-symbols-outlined {
-      color: $color-text-secondary;
-      font-size: 1.5rem;
+      font-size: 2.5rem;
+      color: $color-primary;
     }
 
-    .email {
-      color: $color-text-secondary;
-      font-size: 0.875rem;
-      font-weight: 500;
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0;
+      color: $color-text;
     }
 
-    .logout-btn {
-      display: flex;
-      align-items: center;
-      gap: $spacing-xs;
-      padding: $spacing-xs $spacing-md;
-      background: transparent;
-      border: 1px solid $color-border;
-      border-radius: $radius-md;
-      color: $color-text-secondary;
+    .subtitle {
       font-size: 0.875rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-
-      .material-symbols-outlined {
-        font-size: 1.125rem;
-      }
-
-      &:hover {
-        background: $color-bg-tertiary;
-        border-color: $color-border-light;
-        color: $color-text;
-      }
+      color: $color-text-secondary;
+      margin: $spacing-xs 0 0 0;
     }
   }
 }
 
-.main {
-  flex: 1;
-  padding: $spacing-xl;
-  overflow-y: auto;
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-lg;
+  background: $color-primary;
+  border: none;
+  border-radius: $radius-md;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .material-symbols-outlined {
+    font-size: 1.25rem;
+  }
+
+  &:hover {
+    background: $color-primary-dark;
+    transform: translateY(-1px);
+  }
 }
 
 .control-grid {
+  flex: 1;
   display: grid;
   grid-template-columns: 400px 1fr;
   gap: $spacing-xl;
   max-width: 1800px;
   margin: 0 auto;
-  height: 100%;
+  padding: $spacing-xl;
+  width: 100%;
+  overflow: hidden;
 }
 
 .panel {
@@ -400,11 +362,6 @@ function getEntityCountByDomain(domain) {
       display: flex;
       align-items: center;
       gap: $spacing-sm;
-
-      .material-symbols-outlined {
-        font-size: 1.5rem;
-        color: $color-primary;
-      }
 
       h2 {
         font-size: 1.125rem;
@@ -484,30 +441,6 @@ function getEntityCountByDomain(domain) {
         transform: translateY(-1px);
       }
     }
-  }
-}
-
-.add-btn {
-  display: flex;
-  align-items: center;
-  gap: $spacing-xs;
-  padding: $spacing-xs $spacing-md;
-  background: $color-primary;
-  border: none;
-  border-radius: $radius-md;
-  color: white;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  .material-symbols-outlined {
-    font-size: 1.125rem;
-  }
-
-  &:hover {
-    background: $color-primary-dark;
-    transform: translateY(-1px);
   }
 }
 
